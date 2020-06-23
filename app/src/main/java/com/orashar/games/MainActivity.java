@@ -19,5 +19,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, WordEcho.class));
             }
         });
+        findViewById(R.id.matching_blocks).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, MatchingBlocks.class));
+            }
+        });
     }
 }
