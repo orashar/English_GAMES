@@ -6,13 +6,43 @@
     android:layout_height="match_parent"
     tools:context=".WordEcho">
 
-    <TextView
-        android:id="@+id/score_tv"
-        android:textColor="#484848"
-        android:text="Score : 0"
-        android:textSize="36dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            android:id="@+id/animated_timer"
+            android:alpha="0.5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/score_tv"
+            android:textSize="28sp"
+            android:textColor="#fff"
+            android:text="Score : 0"
+            android:gravity="center"
+            android:background="@drawable/score_bg"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/timer_tv"
+            android:textSize="24sp"
+            android:textColor="#fff"
+            android:text="00"
+            android:gravity="center"
+            android:background="@drawable/timer_bg"
+            android:textStyle="bold"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="24dp"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"/>
+
+
+    </RelativeLayout>
 
     <ImageButton
         android:id="@+id/play_ib"
@@ -23,11 +53,22 @@
         android:layout_width="60dp"
         android:layout_height="60dp"/>
 
+    <TextView
+        android:id="@+id/current_question_tv"
+        android:textSize="24sp"
+        android:text="--/--"
+        android:textStyle="bold"
+        android:padding="12dp"
+        android:layout_alignTop="@id/play_ib"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <EditText
         android:id="@+id/answer_et"
-        android:hint="type answer"
+        android:hint="Answer"
         android:layout_centerInParent="true"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
 

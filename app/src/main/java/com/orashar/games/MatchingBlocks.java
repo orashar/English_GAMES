@@ -4,8 +4,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.renderscript.Sampler;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,8 +27,10 @@ public class MatchingBlocks extends AppCompatActivity {
 
     RecyclerView blocksrv;
     List<MatchingBlocksItemObject> wordsList;
-    int score;
-    TextView scoretv;
+    int score, maxWidth;
+    TextView scoretv, timertv, animatedTimer;
+    CountDownTimer cdt;
+    ValueAnimator widthAnimator, colorAnimator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +48,35 @@ public class MatchingBlocks extends AppCompatActivity {
         scoretv = findViewById(R.id.score_tv);
         scoretv.setText("Score : " + score);
 
+        timertv = findViewById(R.id.timer_tv);
+        timertv.setText("20");
+        cdt = new CountDownTimer(20000, 1000) {
+            @Override
+            public void onTick(long l) {
+                timertv.setText(String.valueOf(l/1000));
+            }
+
+            @Override
+            public void onFinish() {
+                finishGame();
+                Toast.makeText(MatchingBlocks.this, "Time Out", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        animatedTimer = findViewById(R.id.animated_timer);
+
+        int colorFrom = Color.GREEN;
+        int colorTo = Color.RED;
+        colorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        colorAnimator.setDuration(40000);
+        colorAnimator.setInterpolator(new DecelerateInterpolator());
+        colorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                Log.v("ColorAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());
+                animatedTimer.setBackgroundColor((int) valueAnimator.getAnimatedValue());
+            }
+        });
 
         int screenHeight = getWindowManager().getDefaultDisplay().getHeight();
         final MatchingBlocksAdapter adapter = new MatchingBlocksAdapter(wordsList, screenHeight/5);
@@ -62,6 +104,7 @@ public class MatchingBlocks extends AppCompatActivity {
                     }
 
                     adapter.notifyDataSetChanged();
+                    if(score >= 60) finishGame();
                 } else {
                     wordsList.get(position).setSelected(true);
                     adapter.notifyDataSetChanged();
@@ -71,6 +114,39 @@ public class MatchingBlocks extends AppCompatActivity {
                 }
             }
         });
+
+        animatedTimer.post(new Runnable() {
+            @Override
+            public void run() {
+                maxWidth = ((View)animatedTimer.getParent()).getMeasuredWidth();
+                widthAnimator = ValueAnimator.ofInt(maxWidth, 0);
+                widthAnimator.setDuration(40000);
+                widthAnimator.setInterpolator(null);
+                widthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        animatedTimer.getLayoutParams().width = (int)valueAnimator.getAnimatedValue();
+                        animatedTimer.requestLayout();
+                        Log.v("widthAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());                    }
+                });
+                cdt.start();
+                widthAnimator.start();
+                colorAnimator.start();
+            }
+        });
+    }
+
+    public static float convertPixelsToDp(int px, Context context){
+        return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    private void finishGame() {
+        cdt.cancel();
+        blocksrv.setVisibility(View.GONE);
+        Toast.makeText(this, "Game Finished", Toast.LENGTH_SHORT).show();
+        widthAnimator.cancel();
+        colorAnimator.cancel();
+        cdt.cancel();
     }
 
     private int isAnotherBlockSelected() {
@@ -93,5 +169,11 @@ public class MatchingBlocks extends AppCompatActivity {
         wordsList.add(new MatchingBlocksItemObject("Algo", "DS", false, false));
         wordsList.add(new MatchingBlocksItemObject("Competetive", "Necessary", false, false));
         wordsList.add(new MatchingBlocksItemObject("Necessary", "Competetive", false, false));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finishGame();
     }
 }

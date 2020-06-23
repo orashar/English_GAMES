@@ -6,17 +6,47 @@
     android:layout_height="match_parent"
     tools:context=".MatchingBlocks">
 
-    <TextView
-        android:id="@+id/score_tv"
-        android:textSize="28sp"
-        android:textColor="#484848"
-        android:text="Score : 0"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            android:id="@+id/animated_timer"
+            android:alpha="0.5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/score_tv"
+            android:textSize="28sp"
+            android:textColor="#fff"
+            android:text="Score : 0"
+            android:gravity="center"
+            android:background="@drawable/score_bg"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/timer_tv"
+            android:textSize="24sp"
+            android:textColor="#fff"
+            android:text="00"
+            android:gravity="center"
+            android:background="@drawable/timer_bg"
+            android:textStyle="bold"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="24dp"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"/>
+
+
+    </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/blocks_rv"
-        android:layout_below="@+id/score_tv"
+        android:layout_below="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
