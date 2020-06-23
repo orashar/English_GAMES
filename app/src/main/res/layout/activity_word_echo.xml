@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".WordEcho">
+
+    <TextView
+        android:id="@+id/score_tv"
+        android:textColor="#484848"
+        android:text="Score : 0"
+        android:textSize="36dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <ImageButton
+        android:id="@+id/play_ib"
+        android:src="@drawable/ic_play"
+        android:layout_marginTop="72dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="60dp"
+        android:layout_height="60dp"/>
+
+    <EditText
+        android:id="@+id/answer_et"
+        android:hint="type answer"
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+    <ImageButton
+        android:id="@+id/done_ib"
+        android:src="@drawable/ic_done"
+        android:layout_marginBottom="72dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="60dp"
+        android:layout_height="60dp"/>
+
+
+</RelativeLayout>
