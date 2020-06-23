@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/score_tv"
-        android:textSize="48sp"
+        android:textSize="28sp"
         android:textColor="#484848"
         android:text="Score : 0"
         android:layout_width="wrap_content"

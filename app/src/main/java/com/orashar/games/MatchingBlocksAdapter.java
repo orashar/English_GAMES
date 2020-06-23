@@ -16,9 +16,11 @@ public class MatchingBlocksAdapter extends RecyclerView.Adapter<MatchingBlocksAd
 
     List<MatchingBlocksItemObject> list = new ArrayList<>();
     OnItemClickListener listener;
+    int itemHeight;
 
-    public MatchingBlocksAdapter(List<MatchingBlocksItemObject> list) {
+    public MatchingBlocksAdapter(List<MatchingBlocksItemObject> list, int itemHeight) {
         this.list = list;
+        this.itemHeight = itemHeight;
     }
 
     public void setOnItemCLickListener(OnItemClickListener listener){
@@ -45,10 +47,8 @@ public class MatchingBlocksAdapter extends RecyclerView.Adapter<MatchingBlocksAd
             holder.text.setText(list.get(position).getText());
             if (list.get(position).isSelected()) {
                 holder.text.setBackgroundColor(Color.BLUE);
-                holder.itemView.setBackgroundColor(Color.BLUE);
             } else {
                 holder.text.setBackgroundColor(Color.GREEN);
-                holder.itemView.setBackgroundColor(Color.GREEN);
             }
         }
     }
@@ -62,6 +62,8 @@ public class MatchingBlocksAdapter extends RecyclerView.Adapter<MatchingBlocksAd
         TextView text;
         public MatchingBlocksViewHolder(@NonNull View itemView) {
             super(itemView);
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, itemHeight);
+            itemView.setLayoutParams(lp);
             text = itemView.findViewById(R.id.text);
 
             itemView.setOnClickListener(new View.OnClickListener() {

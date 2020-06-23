@@ -35,7 +35,9 @@ public class MatchingBlocks extends AppCompatActivity {
         scoretv = findViewById(R.id.score_tv);
         scoretv.setText("Score : " + score);
 
-        final MatchingBlocksAdapter adapter = new MatchingBlocksAdapter(wordsList);
+
+        int screenHeight = getWindowManager().getDefaultDisplay().getHeight();
+        final MatchingBlocksAdapter adapter = new MatchingBlocksAdapter(wordsList, screenHeight/5);
         blocksrv.setAdapter(adapter);
 
         adapter.setOnItemCLickListener(new MatchingBlocksAdapter.OnItemClickListener() {
