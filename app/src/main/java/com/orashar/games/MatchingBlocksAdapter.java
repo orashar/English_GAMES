@@ -4,6 +4,9 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,7 +31,7 @@ public class MatchingBlocksAdapter extends RecyclerView.Adapter<MatchingBlocksAd
     }
 
     public interface OnItemClickListener{
-        void onItemClick(int position);
+        void onItemClick(View v, int position);
     }
 
     @NonNull
@@ -60,23 +63,32 @@ public class MatchingBlocksAdapter extends RecyclerView.Adapter<MatchingBlocksAd
 
     class MatchingBlocksViewHolder extends RecyclerView.ViewHolder{
         TextView text;
-        public MatchingBlocksViewHolder(@NonNull View itemView) {
+        public MatchingBlocksViewHolder(@NonNull final View itemView) {
             super(itemView);
-            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, itemHeight);
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, itemHeight);
+            lp.setMargins(8, 8, 8, 8);
             itemView.setLayoutParams(lp);
             text = itemView.findViewById(R.id.text);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    shakeView(itemView, 0, 0);
                     if(listener != null){
                         int position = getAdapterPosition();
                         if(position != RecyclerView.NO_POSITION){
-                            listener.onItemClick(position);
+                            listener.onItemClick(itemView, position);
                         }
                     }
                 }
             });
         }
+    }
+    private void shakeView(View view, int duration, int offset){
+        Animation animation = new RotateAnimation(0, 30, 50f, 50f);
+        animation.setDuration(1000);
+        animation.setRepeatCount(Animation.INFINITE);
+        animation.setRepeatMode(Animation.REVERSE);
+        view.startAnimation(animation);
     }
 }

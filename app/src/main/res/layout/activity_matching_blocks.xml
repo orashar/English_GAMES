@@ -6,17 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".MatchingBlocks">
 
+    <TextView
+        android:id="@+id/animated_timer"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <RelativeLayout
         android:id="@+id/header"
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="50dp">
-
-        <TextView
-            android:id="@+id/animated_timer"
-            android:alpha="0.5"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
 
         <TextView
             android:id="@+id/score_tv"
@@ -46,6 +46,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/blocks_rv"
+        android:layout_margin="8dp"
         android:layout_below="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

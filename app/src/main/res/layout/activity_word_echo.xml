@@ -28,23 +28,37 @@
             android:layout_width="150dp"
             android:layout_height="wrap_content"/>
 
-        <TextView
-            android:id="@+id/timer_tv"
-            android:textSize="24sp"
-            android:textColor="#fff"
-            android:text="00"
-            android:gravity="center"
+        <RelativeLayout
             android:background="@drawable/timer_bg"
-            android:textStyle="bold"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="24dp"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"/>
+            android:layout_width="120dp"
+            android:layout_height="wrap_content">
 
+            <ImageView
+                android:src="@drawable/ic_timer"
+                android:layout_toLeftOf="@id/timer_tv"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:layout_width="24dp"
+                android:layout_height="24dp"/>
+            
+            <TextView
+                android:id="@+id/timer_tv"
+                android:textSize="24sp"
+                android:textColor="#fff"
+                android:text="00"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:layout_centerInParent="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
+        
 
     </RelativeLayout>
 
-    <ImageButton
+    <ImageView
         android:id="@+id/play_ib"
         android:src="@drawable/ic_play"
         android:layout_marginTop="72dp"
@@ -64,15 +78,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <TextView
+        android:id="@+id/lives_tv"
+        android:textSize="18sp"
+        android:text="-- lives"
+        android:padding="12dp"
+        android:layout_alignTop="@id/play_ib"
+        android:layout_alignParentLeft="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
     <EditText
         android:id="@+id/answer_et"
         android:hint="Answer"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:background="@drawable/word_echo_answer_bg"
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
 
-    <ImageButton
+    <ImageView
         android:id="@+id/done_ib"
         android:src="@drawable/ic_done"
         android:layout_marginBottom="72dp"

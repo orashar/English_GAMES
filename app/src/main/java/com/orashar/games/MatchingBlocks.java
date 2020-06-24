@@ -16,7 +16,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,9 +27,11 @@ import java.util.List;
 
 public class MatchingBlocks extends AppCompatActivity {
 
+    public static final int GAME_DURATION = 40000;
+
     RecyclerView blocksrv;
     List<MatchingBlocksItemObject> wordsList;
-    int score, maxWidth;
+    int score, maxHeight;
     TextView scoretv, timertv, animatedTimer;
     CountDownTimer cdt;
     ValueAnimator widthAnimator, colorAnimator;
@@ -46,46 +50,19 @@ public class MatchingBlocks extends AppCompatActivity {
 
         score = 0;
         scoretv = findViewById(R.id.score_tv);
-        scoretv.setText("Score : " + score);
 
         timertv = findViewById(R.id.timer_tv);
-        timertv.setText("20");
-        cdt = new CountDownTimer(20000, 1000) {
-            @Override
-            public void onTick(long l) {
-                timertv.setText(String.valueOf(l/1000));
-            }
 
-            @Override
-            public void onFinish() {
-                finishGame();
-                Toast.makeText(MatchingBlocks.this, "Time Out", Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        animatedTimer = findViewById(R.id.animated_timer);
-
-        int colorFrom = Color.GREEN;
-        int colorTo = Color.RED;
-        colorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        colorAnimator.setDuration(40000);
-        colorAnimator.setInterpolator(new DecelerateInterpolator());
-        colorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                Log.v("ColorAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());
-                animatedTimer.setBackgroundColor((int) valueAnimator.getAnimatedValue());
-            }
-        });
 
         int screenHeight = getWindowManager().getDefaultDisplay().getHeight();
-        final MatchingBlocksAdapter adapter = new MatchingBlocksAdapter(wordsList, screenHeight/5);
+        final MatchingBlocksAdapter adapter = new MatchingBlocksAdapter(wordsList, screenHeight/6);
         blocksrv.setAdapter(adapter);
 
         adapter.setOnItemCLickListener(new MatchingBlocksAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(View v, int position) {
                 int isAnotherSelected = isAnotherBlockSelected();
+                shakeView(v, 10, 0);
                 if (isAnotherSelected >= 0) {
                     wordsList.get(position).setSelected(false);
                     wordsList.get(isAnotherSelected).setSelected(false);
@@ -115,19 +92,60 @@ public class MatchingBlocks extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void startGame(){
+
+    }
+
+    private void updateScore(){
+        scoretv.setText("Score : " + score);
+    }
+
+    private void startTimer(){
+
+        timertv.setText("20");
+        cdt = new CountDownTimer(20000, 1000) {
+            @Override
+            public void onTick(long l) {
+                timertv.setText(String.valueOf(l/1000));
+            }
+
+            @Override
+            public void onFinish() {
+                finishGame();
+                Toast.makeText(MatchingBlocks.this, "Time Out", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        animatedTimer = findViewById(R.id.animated_timer);
+
+        int colorFrom = Color.GREEN;
+        int colorTo = Color.RED;
+        colorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        colorAnimator.setDuration(40000);
+        colorAnimator.setInterpolator(new DecelerateInterpolator());
+        colorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                Log.v("ColorAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());
+                animatedTimer.setBackgroundColor((int) valueAnimator.getAnimatedValue());
+            }
+        });
+
         animatedTimer.post(new Runnable() {
             @Override
             public void run() {
-                maxWidth = ((View)animatedTimer.getParent()).getMeasuredWidth();
-                widthAnimator = ValueAnimator.ofInt(maxWidth, 0);
+                maxHeight = ((View)animatedTimer.getParent()).getMeasuredHeight();
+                widthAnimator = ValueAnimator.ofInt(0, maxHeight);
                 widthAnimator.setDuration(40000);
                 widthAnimator.setInterpolator(null);
                 widthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        animatedTimer.getLayoutParams().width = (int)valueAnimator.getAnimatedValue();
+                        animatedTimer.getLayoutParams().height = (int)valueAnimator.getAnimatedValue();
                         animatedTimer.requestLayout();
-                        Log.v("widthAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());                    }
+                    }
                 });
                 cdt.start();
                 widthAnimator.start();
@@ -136,16 +154,23 @@ public class MatchingBlocks extends AppCompatActivity {
         });
     }
 
-    public static float convertPixelsToDp(int px, Context context){
-        return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+
+    private void shakeView(View view, int duration, int offset){
+        Animation animation = new RotateAnimation(0, 30, 0, 0);
+        animation.setDuration(1000);
+        animation.setRepeatCount(Animation.INFINITE);
+        animation.setRepeatMode(Animation.REVERSE);
+        view.startAnimation(animation);
     }
 
     private void finishGame() {
         cdt.cancel();
-        blocksrv.setVisibility(View.GONE);
-        Toast.makeText(this, "Game Finished", Toast.LENGTH_SHORT).show();
         widthAnimator.cancel();
         colorAnimator.cancel();
+        animatedTimer.getLayoutParams().height = maxHeight;
+        animatedTimer.requestLayout();
+        blocksrv.setVisibility(View.GONE);
+        Toast.makeText(this, "Game Finished", Toast.LENGTH_SHORT).show();
         cdt.cancel();
     }
 

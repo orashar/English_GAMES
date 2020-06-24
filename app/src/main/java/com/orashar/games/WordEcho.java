@@ -12,9 +12,12 @@ import android.text.InputFilter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,12 +28,15 @@ import java.util.Locale;
 
 public class WordEcho extends AppCompatActivity {
 
-    ImageButton playib, doneib;
+    private boolean isActivityAlive = false;
+    public static final int DURATION_FOR_ONE_QUESTION = 15000;
+
+    ImageView playib, doneib;
     EditText answeret;
-    TextView scoretv, timertv, animatedTimer, currentTimertv;
+    TextView scoretv, timertv, animatedTimer, currentQuestiontv, livestv;
     TextToSpeech tts;
     List<String> wordsList;
-    int position, score, maxWidth;
+    int position, score, maxWidth, remainingLives;
     HashMap<String, String> onlineSpeech;
     CountDownTimer cdt;
     ValueAnimator widthAnimator, colorAnimator;
@@ -52,8 +58,8 @@ public class WordEcho extends AppCompatActivity {
 
         scoretv = findViewById(R.id.score_tv);
         scoretv.setText("Score : 0");
-        currentTimertv = findViewById(R.id.current_question_tv);
-        currentTimertv.setText((position+1)+"/"+wordsList.size());
+        livestv = findViewById(R.id.lives_tv);
+        currentQuestiontv = findViewById(R.id.current_question_tv);
 
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
@@ -72,10 +78,16 @@ public class WordEcho extends AppCompatActivity {
 
     private void startGame() {
         startTimer();
-        answeret.setFilters(new InputFilter[] {new InputFilter.LengthFilter(wordsList.get(position).length())});
+        remainingLives = 3;
+        int answerLength = wordsList.get(position).length();
+        answeret.setFilters(new InputFilter[] {new InputFilter.LengthFilter(answerLength)});
+        answeret.setHint(answerLength + " letters");
+        currentQuestiontv.setText((position+1)+"/"+wordsList.size());
+        livestv.setText(remainingLives + " lives");
         playib.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                shakeView(playib, 200, 0);
                 tts.speak(wordsList.get(position), TextToSpeech.QUEUE_FLUSH, onlineSpeech);
             }
         });
@@ -85,19 +97,9 @@ public class WordEcho extends AppCompatActivity {
                 if (position < wordsList.size()-1) {
                     String input = answeret.getText().toString();
                     if (input.toLowerCase().equals(wordsList.get(position).toLowerCase())) {
-                        Toast t = Toast.makeText(WordEcho.this, "Correct answer", Toast.LENGTH_SHORT);
-                        t.setGravity(Gravity.CENTER, 0, 0);
-                        t.show();
-                        position++;
-                        score += 10;
-                        scoretv.setText("Score : " + score);
-                        currentTimertv.setText((position+1)+"/"+wordsList.size());
-                        answeret.setText("");
-                        answeret.setFilters(new InputFilter[] {new InputFilter.LengthFilter(wordsList.get(position).length())});
+                        handleCorrectAnswer();
                     }else{
-                        Toast t = Toast.makeText(WordEcho.this, "Wrong answer", Toast.LENGTH_SHORT);
-                        t.setGravity(Gravity.CENTER, 0, 0);
-                        t.show();
+                        handleWrongAnswer();
                     }
                 } else{
                     finishGame();
@@ -106,10 +108,42 @@ public class WordEcho extends AppCompatActivity {
         });
     }
 
+    private void handleCorrectAnswer(){
+        answeret.setText("");
+        showToast("Correct answer", Gravity.CENTER);
+        score += 10;
+        scoretv.setText("Score : " + score);
+        nextQuestion();
+    }
+
+    private void  handleWrongAnswer(){
+        showToast("Wrong Answer", Gravity.CENTER);
+    }
+
+    private void nextQuestion(){
+        position++;
+        currentQuestiontv.setText((position+1)+"/"+wordsList.size());
+        int answerLength = wordsList.get(position).length();
+        answeret.setFilters(new InputFilter[] {new InputFilter.LengthFilter(answerLength)});
+        answeret.setHint(answerLength + " letters");
+        startTimer();
+    }
+
+    private void showToast(String body, int location) {
+        if (isActivityAlive) {
+            Toast t = Toast.makeText(WordEcho.this, body, Toast.LENGTH_SHORT);
+            t.setGravity(location, 0, 0);
+            t.show();
+        }
+    }
+
     private void startTimer() {
         timertv = findViewById(R.id.timer_tv);
         timertv.setText("20");
-        cdt = new CountDownTimer(20000, 1000) {
+        if(cdt != null) cdt.cancel();
+        if(widthAnimator != null) widthAnimator.cancel();
+        if(colorAnimator != null) colorAnimator.cancel();
+        cdt = new CountDownTimer(DURATION_FOR_ONE_QUESTION, 1000) {
             @Override
             public void onTick(long l) {
                 timertv.setText(String.valueOf(l/1000));
@@ -117,8 +151,17 @@ public class WordEcho extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                finishGame();
-                Toast.makeText(WordEcho.this, "Time Out", Toast.LENGTH_SHORT).show();
+                if(position == wordsList.size()-1) {
+                    finishGame();
+                } else {
+                    if (remainingLives <= 0) {
+                        finishGame();
+                    } else {
+                        updateLives(-1);
+                        nextQuestion();
+                    }
+                }
+                showToast("Time Out", Gravity.BOTTOM);
             }
         };
 
@@ -127,12 +170,11 @@ public class WordEcho extends AppCompatActivity {
         int colorFrom = Color.GREEN;
         int colorTo = Color.RED;
         colorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        colorAnimator.setDuration(40000);
+        colorAnimator.setDuration(DURATION_FOR_ONE_QUESTION*2);
         colorAnimator.setInterpolator(new DecelerateInterpolator());
         colorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                Log.v("ColorAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());
                 animatedTimer.setBackgroundColor((int) valueAnimator.getAnimatedValue());
             }
         });
@@ -142,14 +184,13 @@ public class WordEcho extends AppCompatActivity {
             public void run() {
                 maxWidth = ((View)animatedTimer.getParent()).getMeasuredWidth();
                 widthAnimator = ValueAnimator.ofInt(maxWidth, 0);
-                widthAnimator.setDuration(40000);
+                widthAnimator.setDuration(DURATION_FOR_ONE_QUESTION*2);
                 widthAnimator.setInterpolator(null);
                 widthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         animatedTimer.getLayoutParams().width = (int)valueAnimator.getAnimatedValue();
-                        animatedTimer.requestLayout();
-                        Log.v("widthAniamtorValue", "value:"+(int)valueAnimator.getAnimatedValue());                    }
+                        animatedTimer.requestLayout();                }
                 });
                 cdt.start();
                 widthAnimator.start();
@@ -159,11 +200,14 @@ public class WordEcho extends AppCompatActivity {
 
     }
 
+    private void updateLives(int i) {
+        remainingLives += i;
+        livestv.setText(remainingLives + " lives");
+    }
+
     private void finishGame() {
-        currentTimertv.setText("--/--");
-        Toast t = Toast.makeText(WordEcho.this, "Game Finished", Toast.LENGTH_SHORT);
-        t.setGravity(Gravity.CENTER, 0, 0);
-        t.show();
+        currentQuestiontv.setText("--/--");
+        showToast("Game Finished", Gravity.BOTTOM);
         answeret.setVisibility(View.GONE);
         playib.setEnabled(false);
         doneib.setEnabled(false);
@@ -183,6 +227,25 @@ public class WordEcho extends AppCompatActivity {
         wordsList.add("Hen");
         wordsList.add("Ink");
         wordsList.add("Jellyfish");
+    }
+
+    private void shakeView(View view, int duration, int offset){
+        Animation animation = new RotateAnimation(-30, 30, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        animation.setDuration(duration);
+        animation.setRepeatMode(Animation.INFINITE);
+        view.startAnimation(animation);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isActivityAlive = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActivityAlive = true;
     }
 
     @Override
